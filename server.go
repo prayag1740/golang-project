@@ -2,13 +2,14 @@ package main
 
 import (
 	"io"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prayag1740/golang-project/controller"
 	"github.com/prayag1740/golang-project/middleware"
 	"github.com/prayag1740/golang-project/service"
-	"github.com/tpkeeper/gin-dump"
+	gindump "github.com/tpkeeper/gin-dump"
 )
 
 var videoService service.VideoService = service.New()
@@ -31,7 +32,12 @@ func main() {
 	})
 
 	server.POST("/post-video", func(ctx *gin.Context) {
-		ctx.JSON(200, videoController.Save(ctx))
+		newVideo, err := videoController.Save(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(200, newVideo)
 	})
 
 	server.Run(":8080")
